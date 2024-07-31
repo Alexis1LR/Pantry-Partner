@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { useState,useEffect } from "react"; //state variables and client-sided functions from react
 import { firestore } from "@/firebase"; //from firebase file
-import { Box, Typography } from '@mui/material'
+import { Box, Button, Modal, Stack, TextField, Typography } from '@mui/material'
 import { collection, deleteDoc, getDocs, query, setDoc } from "firebase/firestore";
 
 export default function Home() {
@@ -70,16 +70,52 @@ const removeItem = async (item) => {
     updateInventory()
   }, [])
 
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
+
   //in MUI, a box is the most basic starting block
-  return <Box>
+  return (
+    //100% of the width of the components 
+  
+  <Box width = "100vw" height="100vh" display="flex" justifyContent="center" alignItems="center" gap={2}>
+    <Modal open={open} onClose={handleClose}>
+      <Box
+      position = "absolute" 
+      top="50%"
+      left="50%"  
+      width ={400} 
+      bgcolor="white" 
+      border="2px solid black" 
+      boxShadow={24}
+      p={4}
+      display="flex"
+      flexDirection="column"
+      gap={3}
+      sx={{
+        transform:"translate(-50%,-50%)"
+      }}
+      >
+        <Typography variant="h6">Add item</Typography>
+        
+        <Stack variant="100%" direction = "row" spacing={2}>
+          <TextField
+          variant='outlined'
+          fullWidth
+          value = {itemName}
+          onChange={(e) =>{
+            setItemName(e.target.value)
+          }}
+          />
+          <Button variant='outlined' onClick={()=>{
+            addItem(item)
+            setItemName('')
+            handleClose() //closes db
+          }}>Add</Button>
+        </Stack>
+      </Box>
+    </Modal>
     <Typography variant="h1">Portfolio Partner</Typography>
-    {
-      inventory.forEach((item) =>{
-        return (<Box>
-          {item.name}
-          {item.count}
-        </Box>)
-      })
-    }
+    
   </Box> 
+  )
 }
