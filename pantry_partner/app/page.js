@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState,useEffect } from "react"; //state variables and client-sided functions from react
 import { firestore } from "@/firebase"; //from firebase file
 import { Box, Typography } from '@mui/material'
-import { collection, deleteDoc, getDocs, query } from "firebase/firestore";
+import { collection, deleteDoc, getDocs, query, setDoc } from "firebase/firestore";
 
 export default function Home() {
   const [inventory, setInventory] = useState([]) //state variable that stores inventory
@@ -15,7 +15,7 @@ export default function Home() {
   //async means it wont block the code while fetching, meaning that the site wont freeze
   const updateInventory = async () => {
     //gets snapshot of collection
-    const snapShot = query(collection(firestore, 'inventory')) //firestore instance, inventory
+    const snapShot = query(collection(firestore, 'inventory')) //parameters: firestore instance, inventory
     //gets documents from collection 'inventory'
     const docs = await getDocs(snapShot)
     const inventoryList = []
@@ -28,6 +28,22 @@ export default function Home() {
       })
     })
     setInventory(inventoryList)
+  }
+
+  const addItem = async (item) => {
+    const docRef = doc(collection(firestore, 'inventory'), item) //gets the direct item ref
+    const docSnap = await getDoc(docRef) //get document snapshot if it exists
+  
+    if (docSnap.exists()){ //this means that the item is in the database
+      const {quantity} = docSnap.data() //get quantity from data
+       //it not 1, set doc ref to be quantity-1
+      await setDoc(docRef, {quantity: quantity+1})
+      //if it doesnt exist, do nothing, or throw error message
+    }
+    else{//if the item doesnt exist, we set the quantity to 1
+      await setDoc(docRef, {quantity: 1})
+    }
+    await updateInventory()
   }
 
 const removeItem = async (item) => {
